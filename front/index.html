@@ -17,49 +17,64 @@
 			<br>
 			<button class="btn primary-btn" id="hit">Send</button>
 			<div id="status">alles ok</div>
-			<select id="gamesDrop">
-				<option>Choose a game!</option>
-			</select>
+			<form name="drop_list">	
+				<select id="gamesDrop">
+					<option>Choose a game!</option>
+				</select>
+			</form>
 	</div>
 	
 </body>
+</html>
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
-<script src="/client.js"></script>
 <script>
 	var socket = io();
 	
 	socket.on('games', function (response) {
-		$('#status').text(response.type);
-		if (response.type == 'succ') {
-			$('#status').text(response.state);
-
-		}
-		if (response.type == 'data'){
-			
+		//$('#status').text(response.type);
+		if (response.type == 'games'){
 			var games = response.games;
-			var container = document.getElementById("gamesDrop");
+			var option = '';
+			$('#gamesDrop').empty();
 			for ( var i = 0; i < games.length; i++){
-				var game = games[i].name;
+				/*var game = games[i].name;
 				var element = document.createElement("game");
 				element.textContent = game;
 				element.value = games[i].appid;
-				container.appendChild(el);
+				container.appendChild(element);
+				var optn = document.createElement("OPTION");
+				optn.text = games[i].name;
+				optn.value = games[i].appid;
+				container.options.add(optn)
+				*/
+				option += '<option value="'+ games[i].appid + '">' + games[i].name + '</option>';
 			}
-			container.style.display = "block";
+			$('#gamesDrop').append(option);
+			$('#gamesDrop').show();
 			$('#status').text(games[0].name);
 		}
-		if (response.type == 'err'){
+		if (response.type == 'error'){
 			$('#status').text(response.state);
+			$('#gamesDrop').empty();
+			$('#gamesDrop').hide();
 		}
 	});
 	$('#hit').click(function () {
 		name = "a" + $('#inputUser').val();
-		socket.emit('user', {
-			username: name,
-		});
+		var patt = /^a[0-9]+$/
+		$('#status').text(patt.test(name));
+		if (patt.test(name)){
+			socket.emit('user', {
+				username: name,
+			});
+		}
+		else{
+			$('#gamesDrop').empty();
+			$('#gamesDrop').hide();
+		}
 	});
 </script>
-</html>
+
 	
