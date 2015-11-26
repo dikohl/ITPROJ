@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<title>Project Geysir</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+	<link rel="stylesheet" href="css/stylesheet.css" type="text/css" media="screen">
+</head>
+<body id="index" onload="">
+	<div id ="header">
+		
+	</div>
+	<div id="main">
+			<label for="inputUser">Enter your Account ID</label>
+			<br>
+			<input id="inputUser"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" type="text" value="76561198073068355">
+			<br>
+			<button class="btn primary-btn" id="hit">Send</button>
+			<div id="status">alles ok</div>
+			<select id="gamesDrop">
+				<option>Choose a game!</option>
+			</select>
+	</div>
+	
+</body>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/client.js"></script>
+<script>
+	var socket = io();
+	
+	socket.on('games', function (response) {
+		$('#status').text(response.type);
+		if (response.type == 'succ') {
+			$('#status').text(response.state);
+
+		}
+		if (response.type == 'data'){
+			
+			var games = response.games;
+			var container = document.getElementById("gamesDrop");
+			for ( var i = 0; i < games.length; i++){
+				var game = games[i].name;
+				var element = document.createElement("game");
+				element.textContent = game;
+				element.value = games[i].appid;
+				container.appendChild(el);
+			}
+			container.style.display = "block";
+			$('#status').text(games[0].name);
+		}
+		if (response.type == 'err'){
+			$('#status').text(response.state);
+		}
+	});
+	$('#hit').click(function () {
+		name = "a" + $('#inputUser').val();
+		socket.emit('user', {
+			username: name,
+		});
+	});
+</script>
+</html>
+	

@@ -1,0 +1,29 @@
+body{
+	background-color: #444;
+	color: #FAFAFA;
+}
+
+#main{
+	margin: auto;;
+	height: auto;
+	width: auto;
+	text-align: center;
+	align: center;
+}
+
+#header{
+	
+}
+
+#footer{
+	
+}
+
+#inputUser{
+	margin-bottom:20px;
+	color: black;
+}
+
+#gamesDrop{
+	display: none;
+}
