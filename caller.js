@@ -6,13 +6,13 @@ exports.getData = function(user, game, callback){
 }
 
 exports.getFriends = function(user) {
-	var path = '/IPlayerService/GetOwnedGames/v0001/?key=' + apiKey + '&steamid=' + user.slice(1) + '&include_appinfo=1&format=json';
+	var path = '/IPlayerService/GetOwnedGames/v0001/?key=' + apiKey + '&steamid=' + user + '&include_appinfo=1&format=json';
 	var friends = getFriendsFromSteam(path);
 	
 }
 
 exports.getGames = function(user, callback){
-	var path = '/IPlayerService/GetOwnedGames/v0001/?key=' + apiKey + '&steamid=' + user.slice(1) + '&include_appinfo=1&format=json';
+	var path = '/IPlayerService/GetOwnedGames/v0001/?key=' + apiKey + '&steamid=' + user + '&include_appinfo=1&format=json';
 	var hostname = 'api.steampowered.com';
 	getGamesFromSteam(path, hostname, function(response){
 		

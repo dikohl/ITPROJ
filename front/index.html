@@ -8,12 +8,12 @@
 </head>
 <body id="index" onload="">
 	<div id ="header">
-		
+		<!--TO BE DEFINED-->
 	</div>
 	<div id="main">
 			<label for="inputUser">Enter your Account ID</label>
 			<br>
-			<input id="inputUser"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" type="text" value="76561198073068355">
+			<input id="inputUser"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" type="text" onkeypress="handle(event)" value="76561198073068355"/>
 			<br>
 			<button class="btn primary-btn" id="hit">Send</button>
 			<div id="status">alles ok</div>
@@ -23,6 +23,9 @@
 				</select>
 			</form>
 	</div>
+	<div id="footer">
+		<!--TO BE DEFINED-->
+	</div>
 	
 </body>
 </html>
@@ -31,50 +34,68 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
 	var socket = io();
+	var username = '';
 	
 	socket.on('games', function (response) {
-		//$('#status').text(response.type);
 		if (response.type == 'games'){
 			var games = response.games;
 			var option = '';
 			$('#gamesDrop').empty();
 			for ( var i = 0; i < games.length; i++){
-				/*var game = games[i].name;
-				var element = document.createElement("game");
-				element.textContent = game;
-				element.value = games[i].appid;
-				container.appendChild(element);
-				var optn = document.createElement("OPTION");
-				optn.text = games[i].name;
-				optn.value = games[i].appid;
-				container.options.add(optn)
-				*/
 				option += '<option value="'+ games[i].appid + '">' + games[i].name + '</option>';
 			}
 			$('#gamesDrop').append(option);
+			$('#status').text('Choose a game:');
 			$('#gamesDrop').show();
-			$('#status').text(games[0].name);
 		}
 		if (response.type == 'error'){
 			$('#status').text(response.state);
 			$('#gamesDrop').empty();
 			$('#gamesDrop').hide();
+			username = '';
 		}
 	});
 	$('#hit').click(function () {
-		name = "a" + $('#inputUser').val();
-		var patt = /^a[0-9]+$/
-		$('#status').text(patt.test(name));
-		if (patt.test(name)){
+		sendIdRequest()
+	});
+	function handle(e){
+		if(e.keyCode === 13){
+			sendIdRequest()
+		}
+		return false;
+	}
+	
+	function sendIdRequest(){
+		name = String($('#inputUser').val());
+		var patt = /^[0-9]+$/
+		
+		if (patt.test(name) && name != username){
+			username = name;
 			socket.emit('user', {
 				username: name,
 			});
 		}
+		else if(name == username){
+			$('#status').text('same ID');
+		}
 		else{
+			$('#status').text('An ID only consists of numbers');
 			$('#gamesDrop').empty();
 			$('#gamesDrop').hide();
+			username = '';
 		}
+    }
+	$('#gamesDrop').change(function () {
+		var selectedValue = parseInt(jQuery(this).val());
+		$('#status').text(selectedValue);
+		socket.emit('game', {
+			username: username,
+			game: selectedValue
+		});
+		//sendIdRequest()
 	});
+	
+
 </script>
 
 	

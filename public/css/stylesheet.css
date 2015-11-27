@@ -20,10 +20,17 @@ body{
 }
 
 #inputUser{
-	margin-bottom:20px;
 	color: black;
 }
 
 #gamesDrop{
 	display: none;
+}
+
+#hit{
+	margin: 20px;
+}
+
+#status{
+	
 }

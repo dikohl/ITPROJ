@@ -23,11 +23,11 @@ io.on('connection', function (socket) {
 		);
 	});
 	
-	/*socket.on('game', $0 => {
-		caller.getData(
-			eval($0.username),
+	socket.on('game', $0 => {
+		caller.getFriends(
+			$0.username,
 			eval($0.game),
-		 	(response) => { socket.emit('data', response) }
+		 	(response) => { socket.emit('friends', response) }
 		);
-	});*/
+	});
 });
