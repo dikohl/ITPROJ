@@ -1,5 +1,5 @@
 var http = require('http');
-var apiKey = process.argv.slice(2);
+var apiKey = '68C3D' + 'EE7' + '0F5' + '7D520' + '36' + '7C9' + '18B' + '692' + 'BEDF2';
 var hostname = 'api.steampowered.com';
 
 exports.getFriends = function(user, appId, callback) {
