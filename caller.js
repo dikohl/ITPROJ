@@ -6,25 +6,10 @@ exports.getFriends = function(user, appId, callback) {
 	var path = '/ISteamUser/GetFriendList/v0001/?key=' + apiKey + '&steamid=' + user + '&relationship=friend&format=json';
 	getFriendsFromSteam(path, hostname, function(response){
 		if(response.type == 'friends'){
-			//get games of every freind
-			for(var i = 0; i < response.friends.length; i++){
-				console.log(response.friends[i]);
-				/*getGamesFiltered(response.friends[i].steamid, appId, function(callback){
-					
-					if(response.type == 'games'){
-						callback({
-							type: response.type,
-							games: response.games
-						});
-					}
-					else{
-						callback({
-							type: response.type,
-							state: response.state
-						});
-					}	
-				});*/
-			}
+			callback({
+				type: response.type,
+				friends: response.friends
+			});
 		}
 		//handle error
 		else{
@@ -36,6 +21,30 @@ exports.getFriends = function(user, appId, callback) {
 		
 	});
 	
+}
+
+exports.getFriendsWithSameGame = function(user, appId, friends, callback){
+	friendsWithGame = []
+	if(response.type == 'friends'){
+		for(var i = 0; i < freinds.freinds.length; i++){
+			getGamesFiltered(friends.friends[i].steamId, appId, function(response){
+				if(reponse.owned == 'true'){
+					friendsWithGame.append(friends.friends[i].steamId);
+				}
+			});
+		}
+		callback({
+			type: 'friends',
+			friends: friendsWithGame
+		});
+	}
+	//handle error
+	else{
+		callback({
+			type: response.type,
+			state: response.state
+		});
+	}	
 }
 
 function getGamesFiltered(user, appId, callback){

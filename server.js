@@ -27,7 +27,12 @@ io.on('connection', function (socket) {
 		caller.getFriends(
 			$0.username,
 			eval($0.game),
-		 	(response) => { socket.emit('friends', response) }
+		 	(tmp) => { caller.getFriendsWithSameGame(
+				$0.username,
+				eval($0.game),
+				tmp,
+				(response) => { socket.emit('friends', response) }
+				) }
 		);
 	});
 });
