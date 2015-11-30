@@ -27,8 +27,10 @@ exports.getFriendsWithSameGame = function(user, appId, friends, callback){
 	friendsWithGame = []
 	if(response.type == 'friends'){
 		for(var i = 0; i < freinds.freinds.length; i++){
+			//getOwnedGames with filter on specific game
 			var path = '/IPlayerService/GetOwnedGames/v0001/?key=' + apiKey + '&steamid=' + friends.friends[i].steamId + '&include_appinfo=1&format=json&appids_filter[0]=' + appId;
-			getGamesFiltered(path, function(response){
+			//
+			hasGame(path, function(response){
 				if(reponse.owned == 'true'){
 					friendsWithGame.append(friends.friends[i].steamId);
 				}
@@ -172,7 +174,7 @@ function getFriendsFromSteam(path, callback){
 	});
 }
 
-function getGamesFiltered(path, callback){
+function hasGame(path, callback){
 	
 	var options = {
 		hostname: hostname,
@@ -208,7 +210,8 @@ function getGamesFiltered(path, callback){
 
 			response.on('end',function(){
 				var data = JSON.parse(output);
-				//give back list of friends
+				//determine if user has game or not
+				//with the filter the games list has either 1 or 0 length
 				if(data.response.game_count =! 0){
 					callback({
 						type: 'owned',
