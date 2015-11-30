@@ -26,17 +26,22 @@ exports.getFriends = function(user, appId, callback) {
 exports.getFriendsWithSameGame = function(user, appId, friends, callback){
 	friendsWithGame = []
 	if(response.type == 'friends'){
+		//look at every friend
 		for(var i = 0; i < freinds.freinds.length; i++){
 			//getOwnedGames with filter on specific game
 			var path = '/IPlayerService/GetOwnedGames/v0001/?key=' + apiKey + '&steamid=' + friends.friends[i].steamId + '&include_appinfo=1&format=json&appids_filter[0]=' + appId;
-			//
 			hasGame(path, function(response){
 				if(reponse.owned == 'true'){
+					//if friend has the game add him to the list
 					friendsWithGame.append(friends.friends[i].steamId);
 				}
 			});
 		}
 		console.log(friendsWithGame);
+		// give back list with all freinds that own the game
+		
+		// *****the algorithm for looking for new friends should do it's job here*****
+		
 		callback({
 			type: 'friends',
 			friends: friendsWithGame
@@ -216,6 +221,7 @@ function hasGame(path, callback){
 					callback({
 						type: 'owned',
 						owned: 'true'
+						//could read out time played here and check if it is really the same game
 					});
 				}
 				else{
