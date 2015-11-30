@@ -22,6 +22,7 @@
 					<option>Choose a game!</option>
 				</select>
 			</form>
+			<div id="friends"><div>
 	</div>
 	<div id="footer">
 		<!--TO BE DEFINED-->
@@ -35,6 +36,18 @@
 <script>
 	var socket = io();
 	var username = '';
+	
+	socket.on('friends', function (response) {
+		if(response.type = 'friends'){
+			$('#friends').text(response.friends);
+		}
+		if (response.type == 'error'){
+			$('#status').text(response.state);
+			$('#gamesDrop').empty();
+			$('#gamesDrop').hide();
+			username = '';
+		}
+	});
 	
 	socket.on('games', function (response) {
 		if (response.type == 'games'){
@@ -55,9 +68,11 @@
 			username = '';
 		}
 	});
+	
 	$('#hit').click(function () {
 		sendIdRequest()
 	});
+	
 	function handle(e){
 		if(e.keyCode === 13){
 			sendIdRequest()
@@ -85,6 +100,7 @@
 			username = '';
 		}
     }
+	
 	$('#gamesDrop').change(function () {
 		var selectedValue = parseInt(jQuery(this).val());
 		$('#status').text(selectedValue);
@@ -92,7 +108,6 @@
 			username: username,
 			game: selectedValue
 		});
-		//sendIdRequest()
 	});
 	
 
