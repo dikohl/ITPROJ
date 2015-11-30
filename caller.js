@@ -217,6 +217,8 @@ function hasGame(path, callback){
 				var data = JSON.parse(output);
 				//determine if user has game or not
 				//with the filter the games list has either 1 or 0 length
+				
+				// perhaps it would make sense to test the data further but probably not
 				if(data.response.game_count =! 0){
 					callback({
 						type: 'owned',

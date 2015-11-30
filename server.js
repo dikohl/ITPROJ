@@ -27,6 +27,7 @@ io.on('connection', function (socket) {
 		caller.getFriends(
 			$0.username,
 			eval($0.game),
+			//call function to determine Friends with same Game
 		 	(tmp) => { caller.getFriendsWithSameGame(
 				$0.username,
 				eval($0.game),
