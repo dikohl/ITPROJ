@@ -39,6 +39,7 @@
 	
 	socket.on('friends', function (response) {
 		if(response.type = 'friends'){
+			$('#friends').empty()
 			$('#friends').text(response.friends);
 		}
 		if (response.type == 'error'){
