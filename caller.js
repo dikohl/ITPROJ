@@ -4,7 +4,7 @@ var hostname = 'api.steampowered.com';
 
 exports.getFriends = function(user, appId, callback) {
 	var path = '/ISteamUser/GetFriendList/v0001/?key=' + apiKey + '&steamid=' + user + '&relationship=friend&format=json';
-	getFriendsFromSteam(path, hostname, function(response){
+	getFriendsFromSteam(path, function(response){
 		if(response.type == 'friends'){
 			callback({
 				type: response.type,
@@ -27,12 +27,14 @@ exports.getFriendsWithSameGame = function(user, appId, friends, callback){
 	friendsWithGame = []
 	if(response.type == 'friends'){
 		for(var i = 0; i < freinds.freinds.length; i++){
-			getGamesFiltered(friends.friends[i].steamId, appId, function(response){
+			var path = '/IPlayerService/GetOwnedGames/v0001/?key=' + apiKey + '&steamid=' + friends.friends[i].steamId + '&include_appinfo=1&format=json&appids_filter[0]=' + appId;
+			getGamesFiltered(path, function(response){
 				if(reponse.owned == 'true'){
 					friendsWithGame.append(friends.friends[i].steamId);
 				}
 			});
 		}
+		console.log(friendsWithGame);
 		callback({
 			type: 'friends',
 			friends: friendsWithGame
@@ -47,14 +49,10 @@ exports.getFriendsWithSameGame = function(user, appId, friends, callback){
 	}	
 }
 
-function getGamesFiltered(user, appId, callback){
-	//'/IPlayerService/GetOwnedGames/v0001/?key=' + apiKey + '&steamid=' + user + '&include_appinfo=1&format=json&appids_filter[0]=' + appId;
-}
-
 
 exports.getGames = function(user, callback){
 	var path = '/IPlayerService/GetOwnedGames/v0001/?key=' + apiKey + '&steamid=' + user + '&include_appinfo=1&format=json';
-	getGamesFromSteam(path, hostname, function(response){
+	getGamesFromSteam(path, function(response){
 		//handle callback
 		if(response.type == 'games'){
 			callback({
@@ -72,7 +70,7 @@ exports.getGames = function(user, callback){
 	});
 }
 
-var getGamesFromSteam = function (path, hostname, callback){
+var getGamesFromSteam = function (path, callback){
 	//500 if unknown ID
 	//200 if wrong APIKEY
 	
@@ -127,7 +125,7 @@ var getGamesFromSteam = function (path, hostname, callback){
 	});
 }
 
-function getFriendsFromSteam(path, hostname, callback){
+function getFriendsFromSteam(path, callback){
 	
 	//options for http.get
 	var options = {
@@ -169,6 +167,60 @@ function getFriendsFromSteam(path, hostname, callback){
 					type: 'friends',
 					friends: data.friendslist.friends
 				});
+			});
+		}
+	});
+}
+
+function getGamesFiltered(path, callback){
+	
+	var options = {
+		hostname: hostname,
+		path: path,
+		headers: {
+		            accept: 'application/json'
+		        }
+	}
+	
+	http.get(options).on('response', function(response){
+		/*
+		console.log(JSON.stringify(response.headers))
+		console.log(response.statusCode);
+		*/
+		
+		
+		//callback function
+	
+		//if something else than ok (200) is returned
+		if(response.statusCode != 200){
+			callback({
+				type: 'error',
+				state: response.statusCode
+			});
+		}
+		//handle data
+		else{
+			var output = '';
+			//gather JSON chunks
+			response.on('data', function(chunk){
+				output += chunk;
+			});
+
+			response.on('end',function(){
+				var data = JSON.parse(output);
+				//give back list of friends
+				if(data.response.game_count =! 0){
+					callback({
+						type: 'owned',
+						owned: 'true'
+					});
+				}
+				else{
+					callback({
+						type: 'owned',
+						owned: 'false'
+					});
+				}
 			});
 		}
 	});
