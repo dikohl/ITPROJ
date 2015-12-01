@@ -1,0 +1,62 @@
+body{
+	color: #FAFAFA;
+	background-color:#111;
+}
+
+#main{
+	margin: auto;;
+	height: auto;
+	width: auto;
+	text-align: center;
+	align: center;
+}
+
+#blackbox{
+	background-color:#222;
+	min-height:400px;
+	width:30%;
+	margin:auto;
+	margin-top:50px;
+	padding:20px;
+	-webkit-transition: all 2s ease; 
+	-moz-transition: all 2s ease; 
+	-o-transition: all 2s ease; 
+	transition: all 2s ease; 
+}
+
+#blackbox:hover{
+	background-color:#FF6600;
+}
+
+#header{
+	background-color:#222;
+	-webkit-transition: all 2s ease; 
+	-moz-transition: all 2s ease; 
+	-o-transition: all 2s ease; 
+	transition: all 2s ease; 
+	padding: 20px;
+}
+
+#header:hover{
+	background-color:#FF6600;
+}
+	
+#footer{
+	
+}
+
+#inputUser{
+	color: black;
+}
+
+#gamesDrop{
+	display: none;
+}
+
+#hit{
+	margin: 20px;
+}
+
+#status{
+	
+}
