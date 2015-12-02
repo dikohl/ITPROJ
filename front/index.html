@@ -43,7 +43,13 @@
 	socket.on('friends', function (response) {
 		if(response.type = 'friends'){
 			$('#friends').empty()
-			$('#friends').text(response.friends);
+			var friends_list = response.friends;
+			var friends = '';
+			for (var i = 0; i < friends_list.length; i++){
+				console.log(friends_list[i]);
+				friends += friends_list[i] + "<br>";
+			}
+			$('#friends').html(friends);
 		}
 		if (response.type == 'error'){
 			$('#status').text(response.state);
