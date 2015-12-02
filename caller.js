@@ -1,6 +1,7 @@
 var http = require('http');
 var apiKey = '68C3D' + 'EE7' + '0F5' + '7D520' + '36' + '7C9' + '18B' + '692' + 'BEDF2';
 var hostname = 'api.steampowered.com';
+var _ = require('lodash');
 
 exports.getFriends = function(user, appId, callback) {
 	var path = '/ISteamUser/GetFriendList/v0001/?key=' + apiKey + '&steamid=' + user + '&relationship=friend&format=json';
@@ -35,21 +36,29 @@ exports.getFriendsWithSameGame = function(user, appId, friends, callback){
 			//getOwnedGames with filter on specific game
 			var path = '/IPlayerService/GetOwnedGames/v0001/?key=' + apiKey + '&steamid=' + friend.steamid + '&include_appinfo=1&format=json&appids_filter[0]=' + appId;
 			hasGame(path,i,function(response){
-				
 				if(response.owned){
 					//if friend has the game add him to the list
 					friendsWithGame.push(allFriends[response.index].steamid);
 				}
-				//bad solution it doesn't continue until we have looped all, to mask this we could sen updates
+				//bad solution it doesn't continue until we have looped all, to mask this we could send updates
 				requests++;
 				if(requests == allFriends.length){
 					// give back list with all freinds that own the game
-		
-					// *****the algorithm for looking for new friends should do it's job here*****
-					callback({
-						type: 'friends',
-						friends: friendsWithGame
-					});
+					var friendsWithInfo = [];
+					var path = '/ISteamUser/GetPlayerSummaries/v0002/?key=' + apiKey + '&steamids=';
+					
+					// converts friend id into player objects
+					getFriendsInfo(path, friendsWithGame, function(response) {
+						friendsWithInfo = response.players
+						// *****the algorithm for looking for new friends should do it's job here*****
+						callback({
+							type: 'friends', 
+							
+							// takes attribute personaname of all friends
+							friends: _.pluck(friendsWithInfo, 'personaname')
+						});
+					})
+
 				}
 
 			});
@@ -244,6 +253,57 @@ function hasGame(path,index, callback){
 						index: index
 					});
 				}
+			});
+		}
+	});
+}
+
+// converts ids into player objects
+function getFriendsInfo(path, friendslist, callback) {
+	
+	var path = path.concat(friendslist.join(','));
+	//options for http.get
+	
+	var options = {
+		hostname: hostname,
+		path: path,
+		headers: {
+		            accept: 'application/json'
+		        }
+	}
+
+	http.get(options).on('response', function(response){
+		/*
+		console.log(JSON.stringify(response.headers))
+		console.log(response.statusCode);
+		*/
+		
+		
+		//callback function
+	
+		//if something else than ok (200) is returned
+		if(response.statusCode != 200){
+			callback({
+				type: 'error',
+				state: response.statusCode
+			});
+		}
+		//handle data
+		else{
+			var output = '';
+			//gather JSON chunks
+			response.on('data', function(chunk){
+				output += chunk;
+			});
+
+			response.on('end',function(){
+				var data = JSON.parse(output);
+				//give back list of friends
+				
+				callback({
+					type: 'friends',
+					players: data.response.players
+				});
 			});
 		}
 	});
