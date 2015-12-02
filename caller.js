@@ -29,26 +29,29 @@ exports.getFriendsWithSameGame = function(user, appId, friends, callback){
 	if(friends.type == 'friends'){
 		//look at every friend
 		var allFriends = friends.friends;
+		var requests = 0;
 		for(var i = 0; i < allFriends.length; i++){
 			var friend = allFriends[i]
 			//getOwnedGames with filter on specific game
 			var path = '/IPlayerService/GetOwnedGames/v0001/?key=' + apiKey + '&steamid=' + friend.steamid + '&include_appinfo=1&format=json&appids_filter[0]=' + appId;
 			hasGame(path,i,function(response){
+				
 				if(response.owned){
 					//if friend has the game add him to the list
 					friendsWithGame.push(allFriends[response.index].steamid);
 				}
 				//bad solution it doesn't continue until we have looped all, to mask this we could sen updates
-				if(response.index == allFriends.length-1){
+				requests++;
+				if(requests == allFriends.length){
 					// give back list with all freinds that own the game
 		
 					// *****the algorithm for looking for new friends should do it's job here*****
-					console.log(friendsWithGame);
 					callback({
 						type: 'friends',
 						friends: friendsWithGame
 					});
 				}
+
 			});
 		}
 
@@ -225,7 +228,8 @@ function hasGame(path,index, callback){
 				//with the filter the games list has either 1 or 0 length
 				
 				// perhaps it would make sense to test the data further but probably not
-				if(data.response.game_count =! 0){
+				if(data.response.game_count == 1){
+					
 					callback({
 						type: 'owned',
 						owned: true,
