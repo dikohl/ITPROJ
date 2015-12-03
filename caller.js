@@ -26,8 +26,7 @@ exports.getFriends = function(user, appId, callback) {
 }
 
 exports.getFriendsWithSameGame = function(user, appId, friendsResponse, callback){
-	friendsWithGame = []
-
+	friendsWithGame = [];
 	if(friendsResponse.type == 'friends'){
 		//look at every friend
 		var allFriends = friendsResponse.friends;
@@ -52,17 +51,30 @@ exports.getFriendsWithSameGame = function(user, appId, friendsResponse, callback
 					
 					// converts friend id into player objects
 					getFriendsInfo(user, path, friendsWithGame, function(response) {
-						friendsWithInfo = response.players
+						friendsWithInfo = response.players;
+						//console.log(response.players);
 						// *****the algorithm for looking for new friends should do it's job here*****
+						var nodes = [];
+						var edges = [];
+						for(var i = 0; i < friendsWithInfo.length; i++){
+							nodes.push({
+								id: friendsWithInfo[i].steamid,
+								label: friendsWithInfo[i].personaname
+							})
+							edges.push({
+								from: user,
+								to: friendsWithInfo[i].steamid
+							});
+						}
 						callback({
 							type: 'friends',
 							user: user, 
-							// takes attribute personaname of all friends
 							friends: _.pluck(friendsWithInfo, 'personaname'),
-							friendsId: _.pluck(friendsWithInfo, 'steamid')
-						});
-					})
-
+							friendsId: _.pluck(friendsWithInfo, 'steamid'),
+							nodes: nodes,
+							edges: edges
+						})
+					});
 				}
 
 			});
