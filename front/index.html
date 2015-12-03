@@ -32,6 +32,7 @@
 				<div id = "loading">
 					<img src="loader.gif"/>
 				</div>
+				<div id = "visual"></div>
 			</div>
 		</div>
 	</div>
@@ -47,30 +48,65 @@
 <script type="text/javascript">
 	var socket = io();
 	var username = '';
+	var nodes = new vis.DataSet([{id: username, label: "You"}]);
+	var edges = new vis.DataSet();
+	var network;
 	
 	socket.on('friends', function (response) {
 		if(response.type = 'friends'){
-			$('#friends').empty()
-			var friends_list = response.friends;
-			var friends = '';
-			var nodes = new vis.DataSet([
-				{id: 1, label: "You"}
-			]);
-			var edges = new vis.DataSet();
-			for (var i = 0; i < friends_list.length; i++){
-				console.log(friends_list[i]);
-				friends += friends_list[i] + "<br>";
-				nodes.add({id: i+2, label: friends_list[i]})
-				edges.add({from: 1, to: i+2});
-			}
-			var container = document.getElementById('network');
+			$('#friends').empty();
+			$('#visual').show();
+			var respNodes = response.nodes;
+			var respEdges = response.edges;
+			//var friends_list = response.friends;
+			//var friends = '';
+			for (var i = 0; i < respEdges.length; i++){
+				var add = true;
+				if(respEdges[i].from != respEdges[i].to){
+					var edgesSet = [];
+					edgesSet = edges.get({
+						filter: function(item){
+							return (item.from == respEdges[i].to && item.to == respEdges[i].from);
+						}
+					});
+					if(edgesSet.length != 0 && edgesSet.length != null){
+						add = false;
+					}
+				}
+				else{
+					add = false;
+				}
+				
+				if(add){
+					edges.add({from: respEdges[i].from, to: respEdges[i].to})
+				}
+				
+			};
+			for (var i = 0; i < respNodes.length; i++){
+				try{
+					nodes.add({id: respNodes[i].id, label: respNodes[i].label});
+				}catch(e){
+					
+				}
+				$('#status').text(i);
+			};
+
+			var container = document.getElementById('visual');
 			var data = {
 				nodes: nodes,
 				edges: edges
 			};
 			var options = {};
 			$('#loading').hide();
-			var network = new vis.Network(container, data, options);
+			
+			if(network != null){
+				network.setData(data);
+				network.redraw;
+			}
+			else{
+				network = new vis.Network(container, data, options);
+			}
+			
 			/*$('#friends').html(friends);*/
 		}
 		if (response.type == 'error'){
@@ -149,11 +185,15 @@
 	$('#gamesDrop').change(function () {
 		var selectedValue = parseInt(jQuery(this).val());
 		$('#status').text(selectedValue);
-		$('#loading').show();
+		
 		socket.emit('game', {
 			username: username,
 			game: selectedValue
 		});
+		$('#visual').hide();
+		$('#loading').show();
+		nodes = new vis.DataSet([{id: username, label: "You"}]);
+		edges = new vis.DataSet();
 	});
 	
 

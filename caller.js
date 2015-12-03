@@ -5,11 +5,12 @@ var _ = require('lodash');
 
 exports.getFriends = function(user, appId, callback) {
 	var path = '/ISteamUser/GetFriendList/v0001/?key=' + apiKey + '&steamid=' + user + '&relationship=friend&format=json';
-	getFriendsFromSteam(path, function(response){
+	getFriendsFromSteam(user, path, function(response){
 		if(response.type == 'friends'){
 			callback({
 				type: response.type,
-				friends: response.friends
+				friends: response.friends,
+				user: response.user
 			});
 		}
 		//handle error
@@ -24,18 +25,19 @@ exports.getFriends = function(user, appId, callback) {
 	
 }
 
-exports.getFriendsWithSameGame = function(user, appId, friends, callback){
-	friendsWithGame = []
-	
-	if(friends.type == 'friends'){
+exports.getFriendsWithSameGame = function(user, appId, friendsResponse, callback){
+	friendsWithGame = [];
+	if(friendsResponse.type == 'friends'){
 		//look at every friend
-		var allFriends = friends.friends;
+		var allFriends = friendsResponse.friends;
 		var requests = 0;
 		for(var i = 0; i < allFriends.length; i++){
 			var friend = allFriends[i]
 			//getOwnedGames with filter on specific game
 			var path = '/IPlayerService/GetOwnedGames/v0001/?key=' + apiKey + '&steamid=' + friend.steamid + '&include_appinfo=1&format=json&appids_filter[0]=' + appId;
-			hasGame(path,i,function(response){
+			
+			// i is index
+			hasGame(user, path,i,function(response){
 				if(response.owned){
 					//if friend has the game add him to the list
 					friendsWithGame.push(allFriends[response.index].steamid);
@@ -48,17 +50,31 @@ exports.getFriendsWithSameGame = function(user, appId, friends, callback){
 					var path = '/ISteamUser/GetPlayerSummaries/v0002/?key=' + apiKey + '&steamids=';
 					
 					// converts friend id into player objects
-					getFriendsInfo(path, friendsWithGame, function(response) {
-						friendsWithInfo = response.players
+					getFriendsInfo(user, path, friendsWithGame, function(response) {
+						friendsWithInfo = response.players;
+						//console.log(response.players);
 						// *****the algorithm for looking for new friends should do it's job here*****
+						var nodes = [];
+						var edges = [];
+						for(var i = 0; i < friendsWithInfo.length; i++){
+							nodes.push({
+								id: friendsWithInfo[i].steamid,
+								label: friendsWithInfo[i].personaname
+							})
+							edges.push({
+								from: user,
+								to: friendsWithInfo[i].steamid
+							});
+						}
 						callback({
-							type: 'friends', 
-							
-							// takes attribute personaname of all friends
-							friends: _.pluck(friendsWithInfo, 'personaname')
-						});
-					})
-
+							type: 'friends',
+							user: user, 
+							friends: _.pluck(friendsWithInfo, 'personaname'),
+							friendsId: _.pluck(friendsWithInfo, 'steamid'),
+							nodes: nodes,
+							edges: edges
+						})
+					});
 				}
 
 			});
@@ -150,7 +166,7 @@ var getGamesFromSteam = function (path, callback){
 	});
 }
 
-function getFriendsFromSteam(path, callback){
+function getFriendsFromSteam(user, path, callback){
 	
 	//options for http.get
 	var options = {
@@ -190,6 +206,7 @@ function getFriendsFromSteam(path, callback){
 				//give back list of friends
 				callback({
 					type: 'friends',
+					user: user,
 					friends: data.friendslist.friends
 				});
 			});
@@ -197,7 +214,7 @@ function getFriendsFromSteam(path, callback){
 	});
 }
 
-function hasGame(path,index, callback){
+function hasGame(user, path,index, callback){
 	
 	var options = {
 		hostname: hostname,
@@ -242,7 +259,8 @@ function hasGame(path,index, callback){
 					callback({
 						type: 'owned',
 						owned: true,
-						index: index
+						index: index,
+						user: user
 						//could read out time played here and check if it is really the same game
 					});
 				}
@@ -250,7 +268,8 @@ function hasGame(path,index, callback){
 					callback({
 						type: 'owned',
 						owned: false,
-						index: index
+						index: index,
+						user: user
 					});
 				}
 			});
@@ -259,7 +278,7 @@ function hasGame(path,index, callback){
 }
 
 // converts ids into player objects
-function getFriendsInfo(path, friendslist, callback) {
+function getFriendsInfo(user, path, friendslist, callback) {
 	
 	var path = path.concat(friendslist.join(','));
 	//options for http.get
@@ -302,6 +321,7 @@ function getFriendsInfo(path, friendslist, callback) {
 				
 				callback({
 					type: 'friends',
+					user: user,
 					players: data.response.players
 				});
 			});

@@ -29,11 +29,40 @@ io.on('connection', function (socket) {
 			$0.username,
 			eval($0.game),
 			//call function to determine Friends with same Game
-		 	(tmp) => {caller.getFriendsWithSameGame(
+		 	(friendsResponse) => {
+				caller.getFriendsWithSameGame(
 				$0.username,
 				eval($0.game),
-				tmp,
-				(response) => { socket.emit('friends', response) }
+				friendsResponse,
+				(response) => {
+					var friendslist = response.friends;
+					//console.log("friendslist: " + friendslist);
+					socket.emit('friends', response);
+					// level 2 of friends
+					for(var i = 0; i < response.friendsId.length; i++){
+						var friendToQuery = response.friendsId[i];
+						//console.log("friend will be queried:" + friendToQuery + "/ " + friendslist[i]);
+						caller.getFriends(
+							friendToQuery,
+							eval($0.game),
+							//call function to determine Friends with same Game
+						 	(friendsResponse) => {
+								caller.getFriendsWithSameGame(
+								//notdefined
+								friendsResponse.user,
+								eval($0.game),
+								friendsResponse,
+								(response) => {
+									//var friendoffriendlist = response.friends;
+									//console.log("friendsoffriendslist of" + response.user + ": " + response.friends);					
+									console.log(response.nodes);
+									socket.emit('friends', response);
+								}) 
+							}
+						);
+					}
+					
+					}
 				) }
 		);
 	});
