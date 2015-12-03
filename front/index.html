@@ -55,7 +55,6 @@
 	socket.on('friends', function (response) {
 		if(response.type = 'friends'){
 			$('#friends').empty();
-			$('#visual').show();
 			var respNodes = response.nodes;
 			var respEdges = response.edges;
 			//var friends_list = response.friends;
@@ -106,7 +105,8 @@
 			else{
 				network = new vis.Network(container, data, options);
 			}
-			
+			$('#visual').show();
+			$('html, body').scrollTop( $(document).height() );
 			/*$('#friends').html(friends);*/
 		}
 		if (response.type == 'error'){
