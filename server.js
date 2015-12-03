@@ -6,6 +6,7 @@ var caller = require('./caller');
 
 app.get('/', function (request, response) {
 	app.use(express.static(__dirname + '/public'));
+	app.use('/scripts', express.static(__dirname + '/node_modules/vis/dist/'));
 	response.sendFile(__dirname + '/front/index.html');
 });
 

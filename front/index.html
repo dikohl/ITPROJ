@@ -3,12 +3,15 @@
 <head>
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
 	<title>Project Geysir</title>
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-	<link rel="stylesheet" href="css/stylesheet.css" type="text/css" media="screen">
+
+	<script type="text/javascript" src="/scripts/vis.js"></script>
+	<link href="/scripts/vis.css" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>
+	<link rel="stylesheet" href="css/stylesheet.css" type="text/css" media="screen"/>
 </head>
 <body id="index" onload="">
 	<div id ="header">
-		<center><img src="geysir.png" alt="some_text" style="width:128px;height:128px;"></center>
+		<center><img src="geysir.png" style="width:128px;height:128px;"/></center>
 		<h1><center>Geysir</center></h1>
 	</div>
 	<div id="main">
@@ -24,7 +27,12 @@
 					<option>Choose a game!</option>
 				</select>
 			</form>
-			<div id="friends"><div>
+			<div id="friends"></div>
+			<div id = "network">
+				<div id = "loading">
+					<img src="loader.gif"/>
+				</div>
+			</div>
 		</div>
 	</div>
 	<div id="footer">
@@ -36,7 +44,7 @@
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
-<script>
+<script type="text/javascript">
 	var socket = io();
 	var username = '';
 	
@@ -45,11 +53,25 @@
 			$('#friends').empty()
 			var friends_list = response.friends;
 			var friends = '';
+			var nodes = new vis.DataSet([
+				{id: 1, label: "You"}
+			]);
+			var edges = new vis.DataSet();
 			for (var i = 0; i < friends_list.length; i++){
 				console.log(friends_list[i]);
 				friends += friends_list[i] + "<br>";
+				nodes.add({id: i+2, label: friends_list[i]})
+				edges.add({from: 1, to: i+2});
 			}
-			$('#friends').html(friends);
+			var container = document.getElementById('network');
+			var data = {
+				nodes: nodes,
+				edges: edges
+			};
+			var options = {};
+			$('#loading').hide();
+			var network = new vis.Network(container, data, options);
+			/*$('#friends').html(friends);*/
 		}
 		if (response.type == 'error'){
 			$('#status').text(response.state);
@@ -58,6 +80,9 @@
 			username = '';
 		}
 	});
+	
+	
+	
 	
 	socket.on('games', function (response) {
 		if (response.type == 'games'){
@@ -79,6 +104,10 @@
 		}
 	});
 	
+	
+	
+	
+	
 	$('#hit').click(function () {
 		sendIdRequest()
 	});
@@ -89,6 +118,9 @@
 		}
 		return false;
 	}
+	
+	
+	
 	
 	function sendIdRequest(){
 		name = String($('#inputUser').val());
@@ -111,9 +143,13 @@
 		}
     }
 	
+	
+	
+	
 	$('#gamesDrop').change(function () {
 		var selectedValue = parseInt(jQuery(this).val());
 		$('#status').text(selectedValue);
+		$('#loading').show();
 		socket.emit('game', {
 			username: username,
 			game: selectedValue
