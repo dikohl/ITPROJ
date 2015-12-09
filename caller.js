@@ -62,13 +62,13 @@ exports.getFriendsWithSameGame = function(user, appId, friendsResponse, callback
 								label: friendsWithInfo[i].personaname
 							})
 							edges.push({
-								from: user,
+								from: response.user,
 								to: friendsWithInfo[i].steamid
 							});
 						}
 						callback({
 							type: 'friends',
-							user: user, 
+							user: response.user, 
 							friends: _.pluck(friendsWithInfo, 'personaname'),
 							friendsId: _.pluck(friendsWithInfo, 'steamid'),
 							nodes: nodes,

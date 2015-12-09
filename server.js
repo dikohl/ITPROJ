@@ -49,13 +49,13 @@ io.on('connection', function (socket) {
 						 	(friendsResponse) => {
 								caller.getFriendsWithSameGame(
 								//notdefined
-								friendsResponse.user,
+								friendToQuery,
 								eval($0.game),
 								friendsResponse,
 								(response) => {
 									//var friendoffriendlist = response.friends;
 									//console.log("friendsoffriendslist of" + response.user + ": " + response.friends);					
-									console.log(response.nodes);
+									console.log(response.edges);
 									socket.emit('friends', response);
 								}) 
 							}
