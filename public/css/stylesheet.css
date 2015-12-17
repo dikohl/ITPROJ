@@ -45,15 +45,12 @@ body{
 	
 }
 
-form{
-	color: black;
-}
-
 #inputUser{
 	color: black;
 }
 
 #gamesDrop{
+	color: black;
 	display: none;
 }
 
