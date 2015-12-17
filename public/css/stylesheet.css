@@ -45,6 +45,10 @@ body{
 	
 }
 
+form{
+	color: black;
+}
+
 #inputUser{
 	color: black;
 }
